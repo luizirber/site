@@ -1,0 +1,670 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="Docutils 0.4: http://docutils.sourceforge.net/" />
+<meta name="version" content="S5 1.1" />
+<title>Criando bindings e extensões com Cython</title>
+<style type="text/css">
+
+/*
+:Author: David Goodger
+:Contact: goodger@users.sourceforge.net
+:Date: $Date: 2005-12-18 01:56:14 +0100 (Sun, 18 Dec 2005) $
+:Revision: $Revision: 4224 $
+:Copyright: This stylesheet has been placed in the public domain.
+
+Default cascading style sheet for the HTML output of Docutils.
+
+See http://docutils.sf.net/docs/howto/html-stylesheets.html for how to
+customize this style sheet.
+*/
+
+/* used to remove borders from tables and images */
+.borderless, table.borderless td, table.borderless th {
+  border: 0 }
+
+table.borderless td, table.borderless th {
+  /* Override padding for "table.docutils td" with "! important".
+     The right padding separates the table cells. */
+  padding: 0 0.5em 0 0 ! important }
+
+.first {
+  /* Override more specific margin styles with "! important". */
+  margin-top: 0 ! important }
+
+.last, .with-subtitle {
+  margin-bottom: 0 ! important }
+
+.hidden {
+  display: none }
+
+a.toc-backref {
+  text-decoration: none ;
+  color: black }
+
+blockquote.epigraph {
+  margin: 2em 5em ; }
+
+dl.docutils dd {
+  margin-bottom: 0.5em }
+
+/* Uncomment (and remove this text!) to get bold-faced definition list terms
+dl.docutils dt {
+  font-weight: bold }
+*/
+
+div.abstract {
+  margin: 2em 5em }
+
+div.abstract p.topic-title {
+  font-weight: bold ;
+  text-align: center }
+
+div.admonition, div.attention, div.caution, div.danger, div.error,
+div.hint, div.important, div.note, div.tip, div.warning {
+  margin: 2em ;
+  border: medium outset ;
+  padding: 1em }
+
+div.admonition p.admonition-title, div.hint p.admonition-title,
+div.important p.admonition-title, div.note p.admonition-title,
+div.tip p.admonition-title {
+  font-weight: bold ;
+  font-family: sans-serif }
+
+div.attention p.admonition-title, div.caution p.admonition-title,
+div.danger p.admonition-title, div.error p.admonition-title,
+div.warning p.admonition-title {
+  color: red ;
+  font-weight: bold ;
+  font-family: sans-serif }
+
+/* Uncomment (and remove this text!) to get reduced vertical space in
+   compound paragraphs.
+div.compound .compound-first, div.compound .compound-middle {
+  margin-bottom: 0.5em }
+
+div.compound .compound-last, div.compound .compound-middle {
+  margin-top: 0.5em }
+*/
+
+div.dedication {
+  margin: 2em 5em ;
+  text-align: center ;
+  font-style: italic }
+
+div.dedication p.topic-title {
+  font-weight: bold ;
+  font-style: normal }
+
+div.figure {
+  margin-left: 2em ;
+  margin-right: 2em }
+
+div.footer, div.header {
+  clear: both;
+  font-size: smaller }
+
+div.line-block {
+  display: block ;
+  margin-top: 1em ;
+  margin-bottom: 1em }
+
+div.line-block div.line-block {
+  margin-top: 0 ;
+  margin-bottom: 0 ;
+  margin-left: 1.5em }
+
+div.sidebar {
+  margin-left: 1em ;
+  border: medium outset ;
+  padding: 1em ;
+  background-color: #ffffee ;
+  width: 40% ;
+  float: right ;
+  clear: right }
+
+div.sidebar p.rubric {
+  font-family: sans-serif ;
+  font-size: medium }
+
+div.system-messages {
+  margin: 5em }
+
+div.system-messages h1 {
+  color: red }
+
+div.system-message {
+  border: medium outset ;
+  padding: 1em }
+
+div.system-message p.system-message-title {
+  color: red ;
+  font-weight: bold }
+
+div.topic {
+  margin: 2em }
+
+h1.section-subtitle, h2.section-subtitle, h3.section-subtitle,
+h4.section-subtitle, h5.section-subtitle, h6.section-subtitle {
+  margin-top: 0.4em }
+
+h1.title {
+  text-align: center }
+
+h2.subtitle {
+  text-align: center }
+
+hr.docutils {
+  width: 75% }
+
+img.align-left {
+  clear: left }
+
+img.align-right {
+  clear: right }
+
+ol.simple, ul.simple {
+  margin-bottom: 1em }
+
+ol.arabic {
+  list-style: decimal }
+
+ol.loweralpha {
+  list-style: lower-alpha }
+
+ol.upperalpha {
+  list-style: upper-alpha }
+
+ol.lowerroman {
+  list-style: lower-roman }
+
+ol.upperroman {
+  list-style: upper-roman }
+
+p.attribution {
+  text-align: right ;
+  margin-left: 50% }
+
+p.caption {
+  font-style: italic }
+
+p.credits {
+  font-style: italic ;
+  font-size: smaller }
+
+p.label {
+  white-space: nowrap }
+
+p.rubric {
+  font-weight: bold ;
+  font-size: larger ;
+  color: maroon ;
+  text-align: center }
+
+p.sidebar-title {
+  font-family: sans-serif ;
+  font-weight: bold ;
+  font-size: larger }
+
+p.sidebar-subtitle {
+  font-family: sans-serif ;
+  font-weight: bold }
+
+p.topic-title {
+  font-weight: bold }
+
+pre.address {
+  margin-bottom: 0 ;
+  margin-top: 0 ;
+  font-family: serif ;
+  font-size: 100% }
+
+pre.literal-block, pre.doctest-block {
+  margin-left: 2em ;
+  margin-right: 2em ;
+  background-color: #eeeeee }
+
+span.classifier {
+  font-family: sans-serif ;
+  font-style: oblique }
+
+span.classifier-delimiter {
+  font-family: sans-serif ;
+  font-weight: bold }
+
+span.interpreted {
+  font-family: sans-serif }
+
+span.option {
+  white-space: nowrap }
+
+span.pre {
+  white-space: pre }
+
+span.problematic {
+  color: red }
+
+span.section-subtitle {
+  /* font-size relative to parent (h1..h6 element) */
+  font-size: 80% }
+
+table.citation {
+  border-left: solid 1px gray;
+  margin-left: 1px }
+
+table.docinfo {
+  margin: 2em 4em }
+
+table.docutils {
+  margin-top: 0.5em ;
+  margin-bottom: 0.5em }
+
+table.footnote {
+  border-left: solid 1px black;
+  margin-left: 1px }
+
+table.docutils td, table.docutils th,
+table.docinfo td, table.docinfo th {
+  padding-left: 0.5em ;
+  padding-right: 0.5em ;
+  vertical-align: top }
+
+table.docutils th.field-name, table.docinfo th.docinfo-name {
+  font-weight: bold ;
+  text-align: left ;
+  white-space: nowrap ;
+  padding-left: 0 }
+
+h1 tt.docutils, h2 tt.docutils, h3 tt.docutils,
+h4 tt.docutils, h5 tt.docutils, h6 tt.docutils {
+  font-size: 100% }
+
+tt.docutils {
+  background-color: #eeeeee }
+
+ul.auto-toc {
+  list-style-type: none }
+
+</style>
+<!-- configuration parameters -->
+<meta name="defaultView" content="slideshow" />
+<meta name="controlVis" content="hidden" />
+<!-- style sheet links -->
+<script src="ui/cython/slides.js" type="text/javascript"></script>
+<link rel="stylesheet" href="ui/cython/slides.css"
+      type="text/css" media="projection" id="slideProj" />
+<link rel="stylesheet" href="ui/cython/outline.css"
+      type="text/css" media="screen" id="outlineStyle" />
+<link rel="stylesheet" href="ui/cython/print.css"
+      type="text/css" media="print" id="slidePrint" />
+<link rel="stylesheet" href="ui/cython/pygments.css" type="text/css"/>
+<link rel="stylesheet" href="ui/cython/opera.css"
+      type="text/css" media="projection" id="operaFix" />
+
+<style type="text/css">
+#currentSlide {display: none;}
+</style>
+</head>
+<body>
+<div class="layout">
+<div id="controls"></div>
+<div id="currentSlide"></div>
+<div id="header">
+
+</div>
+<div id="footer">
+<h1>Criando bindings e extensões com Cython</h1>
+
+</div>
+</div>
+<div class="presentation">
+<div class="slide" id="slide0">
+<h1 class="title">Criando bindings e extensões com Cython</h1>
+<ul class="simple">
+<li>Luiz Carlos Irber Júnior</li>
+<li><a class="reference" href="mailto:luiz.irber&#64;gmail.com">luiz.irber&#64;gmail.com</a></li>
+<li><a class="reference" href="http://www.pinutsstudios.com">http://www.pinutsstudios.com</a></li>
+</ul>
+
+</div>
+<div class="slide" id="id1">
+<h1>.</h1>
+<blockquote>
+<img alt="normal.jpg" src="normal.jpg" />
+</blockquote>
+</div>
+<div class="slide" id="o-que-cython">
+<h1>O que é Cython?</h1>
+<p>Cython é</p>
+<ul class="simple">
+<li>um compilador Python (quase...)<ul>
+<li>um fork mais avançado e com otimizações do Pyrex</li>
+</ul>
+</li>
+<li>uma linguagem Python expandida para<ul>
+<li>escrever extensões rápidas</li>
+<li>interface com bibliotecas em C e C++</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="slide" id="como-usar-cython">
+<h1>Como usar Cython?</h1>
+<ul class="simple">
+<li>escreva seu código Python normalmente<ul>
+<li>Cython traduz para C</li>
+<li>seu compilador C compila uma biblioteca compartilhada para CPython</li>
+<li>você importa seu módulo</li>
+</ul>
+</li>
+<li>distutils pode automatizar o processo!</li>
+</ul>
+</div>
+<div class="slide" id="e-o-desempenho">
+<h1>E o desempenho?</h1>
+<p>Um exemplo rápido:</p>
+<ul class="simple">
+<li>retirado de <a class="reference" href="http://www.perrygeo.net/wordpress/?p=116">http://www.perrygeo.net/wordpress/?p=116</a></li>
+</ul>
+<div class="highlight"><pre><span class="k">import</span> <span class="nn">math</span>
+
+<span class="k">def</span> <span class="nf">great_circle</span><span class="p">(</span><span class="n">lon1</span><span class="p">,</span> <span class="n">lat1</span><span class="p">,</span> <span class="n">lon2</span><span class="p">,</span> <span class="n">lat2</span><span class="p">):</span>
+    <span class="n">radius</span> <span class="o">=</span> <span class="mf">3956</span> <span class="c">#miles</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mf">180.0</span>
+
+    <span class="n">a</span> <span class="o">=</span> <span class="p">(</span><span class="mf">90.0</span><span class="o">-</span><span class="n">lat1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="p">(</span><span class="mf">90.0</span><span class="o">-</span><span class="n">lat2</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">theta</span> <span class="o">=</span> <span class="p">(</span><span class="n">lon2</span><span class="o">-</span><span class="n">lon1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">acos</span><span class="p">((</span><span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">a</span><span class="p">)</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">b</span><span class="p">))</span> <span class="o">+</span>
+                  <span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">a</span><span class="p">)</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">b</span><span class="p">)</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="n">radius</span><span class="o">*</span><span class="n">c</span>
+</pre></div>
+</div>
+<div class="slide" id="benchmark">
+<h1>Benchmark</h1>
+<div class="highlight"><pre><span class="k">import</span> <span class="nn">timeit</span>
+
+<span class="n">lon1</span><span class="p">,</span> <span class="n">lat1</span><span class="p">,</span> <span class="n">lon2</span><span class="p">,</span> <span class="n">lat2</span> <span class="o">=</span> <span class="o">-</span><span class="mf">72.435</span><span class="p">,</span> <span class="mf">34.323</span><span class="p">,</span> <span class="o">-</span><span class="mf">61.828</span><span class="p">,</span> <span class="mf">54.826</span>
+<span class="n">num</span> <span class="o">=</span> <span class="mf">500000</span>
+
+<span class="n">t</span> <span class="o">=</span> <span class="n">timeit</span><span class="o">.</span><span class="n">Timer</span><span class="p">((</span><span class="s">&quot;p1.great_circle(</span><span class="si">%f</span><span class="s">,</span><span class="si">%f</span><span class="s">,</span><span class="si">%f</span><span class="s">,</span><span class="si">%f</span><span class="s">)&quot;</span>
+                   <span class="o">%</span> <span class="p">(</span><span class="n">lon1</span><span class="p">,</span><span class="n">lat1</span><span class="p">,</span><span class="n">lon2</span><span class="p">,</span><span class="n">lat2</span><span class="p">)),</span>
+                 <span class="s">&quot;import p1&quot;</span><span class="p">)</span>
+<span class="k">print</span> <span class="s">&quot;Pure python function&quot;</span><span class="p">,</span> <span class="n">t</span><span class="o">.</span><span class="n">timeit</span><span class="p">(</span><span class="n">num</span><span class="p">),</span> <span class="s">&quot;sec&quot;</span>
+</pre></div>
+<p>Resultado: Pure python function 8.24502420425 sec</p>
+</div>
+<div class="slide" id="e-se-eu-usar-cython">
+<h1>E se eu usar Cython?</h1>
+<p>Mesmo código!</p>
+<p>$ cython p1.py</p>
+<p>$ gcc -O2 -c -fPIC -I/usr/include/python2.5/ p1.c</p>
+<p>$ gcc -shared p1.o -o p1.so</p>
+<p>Resultado: Pure python function, cythonized 7.77563095093 sec</p>
+</div>
+<div class="slide" id="id2">
+<h1>.</h1>
+<blockquote>
+<img alt="turbinada2.jpg" src="turbinada2.jpg" />
+</blockquote>
+</div>
+<div class="slide" id="n-o-melhorou-muito">
+<h1>Não melhorou muito...</h1>
+<p>Paciência, jovem Padawan =]</p>
+<pre>import math
+
+def great_circle(float lon1, float lat1,
+                 float lon2, float lat2):
+    cdef float radius = 3956.0
+    cdef float pi = 3.14159265
+    cdef float x = pi/180.0
+    cdef float a, b, theta, c
+
+    a = (90.0-lat1)*(x)
+    b = (90.0-lat2)*(x)
+    theta = (lon2-lon1)*(x)
+    c = math.acos((math.cos(a)*math.cos(b)) +
+                  (math.sin(a)*math.sin(b)*math.cos(theta)))
+    return radius*c</pre>
+</div>
+<div class="slide" id="primeiros-sinais-de-cython">
+<h1>Primeiros sinais de Cython</h1>
+<pre>cdef float radius = 3956.0</pre>
+<ul class="simple">
+<li>Mas ainda usando o módulo math do Python!</li>
+</ul>
+<p>Resultado: Cython function (still using python math) 7.82765412331 sec</p>
+</div>
+<div class="slide" id="id3">
+<h1>.</h1>
+<blockquote>
+<img alt="turbinada3.jpg" src="turbinada3.jpg" />
+</blockquote>
+</div>
+<div class="slide" id="vamos-melhorar-isso">
+<h1>Vamos melhorar isso!</h1>
+<pre>cdef extern from "math.h":
+    float cosf(float theta)
+    float sinf(float theta)
+    float acosf(float theta)
+
+def great_circle(float lon1, float lat1,
+                 float lon2, float lat2):
+    cdef float radius = 3959.0
+    cdef float pi = 3.14159265
+    cdef float x = pi/180.0
+    cdef float a, b, theta, c
+
+    a = (90.0 - lat1)*(x)
+    b = (90.0 - lat2)*(x)
+    theta = (lon2-lon1)*(x)
+    c = acosf((cosf(a)*cosf(b)) +
+              (sinf(a)*sinf(b)*cosf(theta)))
+    return radius*c</pre>
+</div>
+<div class="slide" id="hein">
+<h1>Hein?</h1>
+<pre>cdef extern from "math.h":
+    float cosf(float theta)
+    float sinf(float theta)
+    float acosf(float theta)</pre>
+<ul class="simple">
+<li>Declaramos a assinatura das funções que vamos usar</li>
+</ul>
+<p>Resultado: Cython function (using trig function from math.h) 1.26355004311 sec</p>
+</div>
+<div class="slide" id="id4">
+<h1>.</h1>
+<blockquote>
+<img alt="turbinada4.jpg" src="turbinada4.jpg" />
+</blockquote>
+</div>
+<div class="slide" id="uau-d-para-melhorar-mais">
+<h1>Uau! Dá para melhorar mais?</h1>
+<pre>cdef extern from "math.h":
+    float cosf(float theta)
+    float sinf(float theta)
+    float acosf(float theta)
+
+cdef float _great_circle(float lon1, float lat1,
+                         float lon2, float lat2):
+    cdef float radius = 3959.0
+    cdef float pi = 3.14159265
+    cdef float x = pi/180.0
+    cdef float a, b, theta, c
+
+    a = (90.0 - lat1)*(x)
+    b = (90.0 - lat2)*(x)
+    theta = (lon2-lon1)*(x)
+    c = acosf((cosf(a)*cosf(b)) + (sinf(a)*sinf(b)*cosf(theta)))
+    return radius*c</pre>
+<p>Continua!</p>
+</div>
+<div class="slide" id="continuando">
+<h1>Continuando</h1>
+<pre>def great_circle(float lon1, float lat1,
+                 float lon2, float lat2, int num):
+    cdef int i
+    cdef float x
+    for i from 0 &lt;= i &lt; num:
+        x = _great_circle(lon1,lat1,lon2,lat2)
+    return x</pre>
+<p>Evitamos unpacking dos argumentos a cada chamada de função</p>
+<p>Resultado: Cython function (avoiding args unpacking) 0.578577041626 sec</p>
+<blockquote>
+O_o</blockquote>
+</div>
+<div class="slide" id="id5">
+<h1>.</h1>
+<blockquote>
+<img alt="turbinada.jpg" src="turbinada.jpg" />
+</blockquote>
+</div>
+<div class="slide" id="vamos-comparar-com-c-puro">
+<h1>Vamos comparar com C puro!</h1>
+<div class="highlight"><pre><span class="cp">#include &lt;math.h&gt;</span>
+<span class="cp">#include &lt;stdio.h&gt;</span>
+<span class="cp">#define NUM 500000</span>
+
+<span class="kt">float</span> <span class="nf">great_circle</span><span class="p">(</span><span class="kt">float</span> <span class="n">lon1</span><span class="p">,</span> <span class="kt">float</span> <span class="n">lat1</span><span class="p">,</span>
+                   <span class="kt">float</span> <span class="n">lon2</span><span class="p">,</span> <span class="kt">float</span> <span class="n">lat2</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kt">float</span> <span class="n">radius</span> <span class="o">=</span> <span class="mf">3956.0</span><span class="p">;</span>
+  <span class="kt">float</span> <span class="n">pi</span> <span class="o">=</span> <span class="mf">3.14159265</span><span class="p">;</span>
+  <span class="kt">float</span> <span class="n">x</span> <span class="o">=</span> <span class="n">pi</span><span class="o">/</span><span class="mf">180.0</span><span class="p">;</span>
+  <span class="kt">float</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">c</span><span class="p">;</span>
+
+  <span class="n">a</span> <span class="o">=</span> <span class="p">(</span><span class="mf">90.0</span> <span class="o">-</span> <span class="n">lat1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>
+  <span class="n">b</span> <span class="o">=</span> <span class="p">(</span><span class="mf">90.0</span> <span class="o">-</span> <span class="n">lat2</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>
+  <span class="n">theta</span> <span class="o">=</span> <span class="p">(</span><span class="n">lon2</span><span class="o">-</span><span class="n">lon1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>
+  <span class="n">c</span> <span class="o">=</span> <span class="n">acos</span><span class="p">((</span><span class="n">cos</span><span class="p">(</span><span class="n">a</span><span class="p">)</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">b</span><span class="p">))</span> <span class="o">+</span> <span class="p">(</span><span class="n">sin</span><span class="p">(</span><span class="n">a</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">b</span><span class="p">)</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)));</span>
+  <span class="k">return</span> <span class="n">radius</span><span class="o">*</span><span class="n">c</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<div class="slide" id="opa-faltou-a-main">
+<h1>Opa, faltou a main()!</h1>
+<div class="highlight"><pre><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span><span class="o">**</span> <span class="n">argv</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kt">int</span> <span class="n">i</span><span class="p">;</span>
+  <span class="kt">float</span> <span class="n">x</span><span class="p">;</span>
+  <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="n">NUM</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">great_circle</span><span class="p">(</span><span class="o">-</span><span class="mf">72.345</span><span class="p">,</span> <span class="mf">34.323</span><span class="p">,</span> <span class="o">-</span><span class="mf">61.823</span><span class="p">,</span> <span class="mf">54.826</span><span class="p">);</span>
+  <span class="p">}</span>
+  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+<p>$ time ./c4</p>
+<pre>real    0m0.881s
+user    0m0.536s
+sys     0m0.000s</pre>
+</div>
+<div class="slide" id="todos-os-benchmarks-juntos">
+<h1>Todos os benchmarks juntos</h1>
+<pre>Pure python function 8.24502420425 sec
+Pure python function, cythonized 7.77563095093 sec
+Cython function (still using python math) 7.82765412331 sec
+Cython function (using trig function from math.h) 1.26355004311 sec
+Cython function (avoiding args unpacking) 0.578577041626 sec
+
+real    0m0.881s
+user    0m0.536s
+sys     0m0.000s</pre>
+</div>
+<div class="slide" id="e-bindings">
+<h1>E bindings?</h1>
+<pre>cdef extern from "Eet.h":
+    ctypedef enum Eet_Error:
+        EET_ERROR_BAD_OBJECT
+    ctypedef struct Eet_File
+    Eet_File* eet_open(char* file, Eet_File_Mode mode)
+    Eet_Error eet_close(Eet_File *ef)
+    char** eet_list(Eet_File *ef, char* glob, int *count_ret)
+    int eet_num_entries(Eet_File* ef)
+
+cdef extern from "Python.h":
+    # stdlib.h
+    void free(void *ptr)</pre>
+<p>Tem bem mais que isso, mas esse subset vai servir no momento.</p>
+</div>
+<div class="slide" id="inicializando">
+<h1>Inicializando</h1>
+<pre>cdef class Eet:
+    cdef Eet_File *ef
+
+    def __init__(self, filename, mode):
+        self.ef = eet_open(filename, mode)
+        if self.ef == NULL:
+            raise EetError("Could not open file")
+
+    def __len__(self):
+        return eet_num_entries(self.ef)</pre>
+</div>
+<div class="slide" id="protocolo-de-dicion-rio">
+<h1>Protocolo de dicionário</h1>
+<pre>def keys(self, glob="*"):
+    """List all entries in eet file matching shell glob.
+
+    @parm glob A shell glob to match against. Default: "*"
+    @return list of entries matching shell glob.
+    @rtype list of str
+    """
+    cdef int count_ret
+    cdef char** entry_list
+    entry_list = eet_list(self.ef, glob, &amp;count_ret)
+    ret_list = []
+    for i from 0 &lt;= i &lt; count_ret:
+        ret_list.append(entry_list[i])
+    python.free(entry_list)
+    return ret_list</pre>
+</div>
+<div class="slide" id="finalizando">
+<h1>Finalizando</h1>
+<pre>def close(self):
+    """Close the eet file and flush any pending writes."""
+    cdef int ret_value
+    if self.ef:
+        ret_value = eet_close(self.ef)
+        if ret_value == EET_ERROR_BAD_OBJECT:
+            raise EetError("Bad Object")
+        self.ef = NULL
+    else:
+        raise EetError("File not open")</pre>
+</div>
+<div class="slide" id="em-desenvolvimento-constante">
+<h1>Em desenvolvimento constante</h1>
+<p>Suporte a C++ : Funciona, mas dá trabalho</p>
+<p>Ainda faltam closures, então nada de generators por enquanto</p>
+<p>Já suporta boa parte do Py3K</p>
+<p>Documentação está começando a melhorar...</p>
+</div>
+<div class="slide" id="s-porque-voc-pode-fazer">
+<h1>Só porque você pode fazer...</h1>
+<p>não significa que você DEVE fazer!</p>
+<p>Quando usar?</p>
+<ul class="simple">
+<li>Acelerar módulos Python que já existem<ul>
+<li>concentre-se na otimização, não em reescrever!</li>
+</ul>
+</li>
+<li>Escrever extensões em C para CPython<ul>
+<li>não mude de linguagem apenas para conseguir velocidade</li>
+<li>e evite escrever toooodo aquele boilerplate...</li>
+</ul>
+</li>
+<li>Bindings de bibliotecas C<ul>
+<li>concentre-se no mapeamento, não na cola!</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="slide" id="perguntas">
+<h1>Perguntas?</h1>
+<blockquote>
+<img alt="happiness.jpg" src="happiness.jpg" />
+</blockquote>
+</div>
+</div>
+</body>
+</html>
