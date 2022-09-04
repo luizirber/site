@@ -1,0 +1,482 @@
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Petabase-Scale Search and Containment Analysis with Fractional Sketches</title>
+<style>
+h1,h2, h3 { font-family:helvetica;font-weight:normal;margin-top:20px; }
+h1 { font-size:19pt;}
+h2 { font-size:14pt;margin-top:40px;}
+h3 { font-size:13pt;margin-top:30px;}
+
+td { vertical-align:top;font-size:small;padding:20px; }
+body { font-family:verdana;font-size:small;text-align:center;line-height:140%;
+     }
+#main { text-align:left;width:900px;margin:auto; }
+img { border:1px solid #8ac;width:440px;height:330px; }
+li { margin-bottom:5px }
+blockquote { font-style:italic; }
+hr { border:1px solid #ddd; }
+</style>
+
+</head>
+<body>
+<div id="main"> <p><a href="https://luizirber.org/">Luiz Irber</a> > <a href="https://luizirber.org/talks/">Talks</a> > Petabase-Scale Search and Containment Analysis with Fractional Sketches
+
+<div style="background:#ffe;padding:4px;padding-left:12px;border:1px solid #aaa;margin-bottom:30px;">
+  <p>This is the text version of a talk I gave on 2022-08-30,
+      at the <a href="https://usermeeting.jgi.doe.gov/agenda/">JGI Annual User Meeting</a> conference in Berkeley, CA - USA.
+</div>
+
+<h1>Petabase-Scale Search and Containment Analysis with Fractional Sketches</h1>
+
+<table>
+
+
+<tr>
+  <td>
+    <img src="thumbs/0.jpg"></td>
+  <td>
+      <p>Hello! I'm Luiz Irber, and this is petabase-scale search and containment analysis with fractional sketches.</p>
+<p>I'm a computational biologist at 10x genomics, but today I'll be taking about the work I did for my PhD at the Lab for Data Intensive Biology at UC Davis,</p>
+
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <img src="thumbs/1.jpg"></td>
+  <td>
+      <p>In collaboration with all these incredible people, including the FracMinHash parts with the Koslicki lab at Penn State, and the biogeography work with the Sumner lab at UC Davis.</p>
+
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <img src="thumbs/2.jpg"></td>
+  <td>
+      <p>The motivation for this work is the flip side of this chart: as sequencing costs drop, we end up with a lot of data in public repositories.</p>
+
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <img src="thumbs/3.jpg"></td>
+  <td>
+      <p>GenBank, for example, grew almost 55% between 2020 and 2021, to 15 TBp, and</p>
+
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <img src="thumbs/4.jpg"></td>
+  <td>
+      <p>the SRA was approaching 18 PB of data last year.</p>
+
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <img src="thumbs/5.jpg"></td>
+  <td>
+      <p>And so, how do we deal with the data deluge?</p>
+<p>In this talk I'll present lightweight approaches for data analysis, focusing on sketching and streaming methods,</p>
+<p>The general workflow is narrowing the amount of data to be analyzed to a smaller subset that is useful for deeper exploration, because not many people have 25PB available to store all this data.</p>
+<p>To do that we might need to rephrase research questions a bit, so let's go through one example.</p>
+
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <img src="thumbs/6.jpg"></td>
+  <td>
+      <p>Let's say you sample a remote environment like Lake Vanda in Antarctica.</p>
+
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <img src="thumbs/7.jpg"></td>
+  <td>
+      <p>Jessica and the Dawn lab analyzed and extracted 5 new metagenome-assembled genomes, each one ~5 MBp long.</p>
+<p>But... There aren't other assembled genomes for these specific cyanobacteria to compare against. At the same time, there is a lot of public metagenomic data in the SRA, around 700 thousand datasets totaling almost a petabyte of data.</p>
+<p>What if we took these MAGs, and checked if we can find very similar organisms in all this data?</p>
+
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <img src="thumbs/8.jpg"></td>
+  <td>
+      <p>That's what Jessica found: there are similar organisms spread through many environments!
+These two bottom ones, for example,</p>
+
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <img src="thumbs/9.jpg"></td>
+  <td>
+      <p>Are from the same environment, but from a different  study, so more data to refine the MAGs.</p>
+<p>The first one is also present in an arctic environment, so all three MAGs are in predominantly cold environments.</p>
+
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <img src="thumbs/10.jpg"></td>
+  <td>
+      <p>Our next MAG is in a variety of environments, from glacial snow to deserts.</p>
+
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <img src="thumbs/11.jpg"></td>
+  <td>
+      <p>And our last one is present in harsh environments, including a lagoon in France that has sulfide and hydrocarbon pollution.</p>
+
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <img src="thumbs/12.jpg"></td>
+  <td>
+      <p>Jessica used a method developed in the DIB Lab called <code>mastiff</code>, a disk-based sourmash index with 486 thousand SRA metagenomes.</p>
+<p>On the right you can see an example running a query for a MAG in real time, taking about 4s.</p>
+<p>I also ran it over 26 hundred MAGs and it took 55 minutes using 24 cores and 540 MB of memory, which is abot 10s per query.</p>
+<p>This tool returns an SRA accession and the containment of the query in the accession, and we will be using it on the workshop on Thu (sorry, you can't sign up anymore!)</p>
+
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <img src="thumbs/13.jpg"></td>
+  <td>
+      <p>Let's dig a bit deeper into what containment is, and how it enables these searches.</p>
+<p>Containment is related to another metric called Jaccard similarity,</p>
+
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <img src="thumbs/14.jpg"></td>
+  <td>
+      <p>Which measures how similar two items are to each other. Using sets, it is a ratio of the intersection of the items over the union.</p>
+<p>This works very well when items are about the same size.</p>
+
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <img src="thumbs/15.jpg"></td>
+  <td>
+      <p>Using a book example: The Dispossessed is a novel by Ursula K Le Guin, and is structured in chapters of similar lengths.</p>
+<p>They alternate between two planets and timeframes, with the first and last being space travel chapters.</p>
+<p>And so I  wanted to know: do the chapters cluster together?</p>
+<p>The first thing to do is processing the chapters into sets. For that we tokenize the text (split into words), remove stop words (like &quot;the&quot;) and can also do stemming to have the root of the words.</p>
+
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <img src="thumbs/16.jpg"></td>
+  <td>
+      <p>Once we do that, we can apply similarity and they do seem to cluster, with odd and even chapters in different groups.</p>
+
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <img src="thumbs/17.jpg"></td>
+  <td>
+      <p>Containment, on the other hand, is a better measure to answer how much of one item is present in another.</p>
+<p>Again using sets, it is a ratio of the intersection of the items over the size of one of them. This gives us different results, unless both items have the same size.</p>
+
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <img src="thumbs/18.jpg"></td>
+  <td>
+      <p>Again for a book example, we can use the Torah and the Bible. The Torah is the first 5 books in the Bible, so if we use the same process for transforming into sets and calculate the similarity we see it is about 34% similar.</p>
+<p>If we calculate the containment of the Bible in the Torah is it about the same, 35%. But the containment of the Torah in the Bible goes to 91%.</p>
+
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <img src="thumbs/19.jpg"></td>
+  <td>
+      <p>For these examples I'm using books, but we can do the same with sequencing data. While we don't have a clear equivalent to what we did with words, we can use nucleotide k-mers for this shingling process, a fancy name for the conversion of a dataset into elements of a set.</p>
+
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <img src="thumbs/20.jpg"></td>
+  <td>
+      <p>So, when to use each one?</p>
+<p>Containment is better when one thing is much larger than the other. So it works better when you try to measure how much of a MAG or genome is in a metagenome, or a contig in a genome.</p>
+<p>Similarity is better when things have the same size. This can be genomes  (in the same kingdom), or chromosomes in a genome, or different metagenomes.</p>
+
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <img src="thumbs/21.jpg"></td>
+  <td>
+      <p>Building sets for all the k-mers is expensive. But there is a technique from 1997 originally developed for comparing web pages called MinHash that provides estimators for similarity and containment using much less space.</p>
+
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <img src="thumbs/22.jpg"></td>
+  <td>
+      <p>This was applied in genomic contexts by Mash in 2016, and the basic idea is to use a hash function to convert k-mers into a hash (an integer), and then pick a fixed number of these hashes as a representation of the original data.</p>
+<p>FracMinHash is an alternative developed in the lab that picks every hash below a threshold, and so isn't fixed-sized anymore. But it is still a fraction of the original data, and you can use this scaled parameter to increase precision (at the cost of memory/space usage).</p>
+<p>Turns out you can use this subset to estimate similarity and containment pretty well, and it is much smaller than the original data.</p>
+
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <img src="thumbs/23.jpg"></td>
+  <td>
+      <p>sourmash is a software package implementing FracMinHash and associated methods as a Python command-line interface and library (with a Rust core) that allows similarity and containment estimation between datasets. We have documentation, tutorials and a development process including tests, continuous integration and frequent releases.</p>
+
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <img src="thumbs/24.jpg"></td>
+  <td>
+      <p>We have over 37 code contributors, and many more users that help guide where we go with it.</p>
+
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <img src="thumbs/25.jpg"></td>
+  <td>
+      <p>There are other methods that also allow estimating the contaiment, but they either need the original data for the query or other sorts of reduced representation like Bloom Filters.</p>
+
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <img src="thumbs/26.jpg"></td>
+  <td>
+      <p>They all work great! If you compare the containment estimation with the ground truth using all the k-mers, they are all very close.</p>
+
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <img src="thumbs/27.jpg"></td>
+  <td>
+      <p>But while the other MinHash-based methods have fixed size for the sketches, FracMinHash grows larger with the complexity of the original dataset. So a metagenome will be much larger than a bacterial genome.</p>
+
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <img src="thumbs/28.jpg"></td>
+  <td>
+      <p>And allow other operations like subtraction and abundance filtering.
+This scaled parameter also allows trade-offs between precision and resource consumption, with lower scaled values giving more precision for smaller queries (like viruses) and larger scaled values allowing faster processing and less memory (good for metagenomes).</p>
+
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <img src="thumbs/29.jpg"></td>
+  <td>
+      <p>OK, so FracMinHash is nice. Wouldn't it be great if we didn't have to download the full datasets and calculate it ourselves?</p>
+<p>And so wort was born, as a system for calculating FracMinHash sketches from public genomic databases.</p>
+
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <img src="thumbs/30.jpg"></td>
+  <td>
+      <p>The idea is to submit requests to build signatures for public datasets, which go into queue. Distributed workers pick jobs, download the sequencing data, and calculate a signature. Then they send the signature to an S3 bucket, which is also mirrored on IPFS, and made available for download.</p>
+<p>The workers currently run in a mixture of HPCs, local workstations and cloud instances.</p>
+
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <img src="thumbs/31.jpg"></td>
+  <td>
+      <p>These slides are from two weeks ago, and now wort is over 13TB of signatures from over 4.7 million datasets from the SRA, GenBank, RefSeq and IMG.</p>
+
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <img src="thumbs/32.jpg"></td>
+  <td>
+      <p>The original data is over 1.3PB, so the petabyte-scale from the talk title is accurate =]</p>
+
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <img src="thumbs/33.jpg"></td>
+  <td>
+      <p>Two years ago, while I was writing my dissertation, I wanted a use case for this pile of data, and so I came up with this MAG search idea. Turns out that building a sourmash index was prohibitive (it's over 700GB of signatures), so I ended up doing a massively parallel search over the 500 thousand metagenomes. It took a week to implement and get results back.</p>
+<p>As a query I used the 26 hundred MAGs from Tully 2017, and got back 23 thousand matches over 50% containment, from 63 hundred thousand SRA runs (excluding TARA and other runs used for building the MAGs).</p>
+<p>It took 11 hours on 32 cores, using 12GB of memory.</p>
+<p>The largest drawback, other than the runtime, was the high latency: the time for 1 query is about the same for 26 hundred queries.</p>
+
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <img src="thumbs/34.jpg"></td>
+  <td>
+      <p>Two months ago I tried out an idea that was in the back of my mind for a long time: what if I use rocksdb, an embedded disk-based key-value store, to build an index?</p>
+<p>And so mastiff was born. It is a large index (over 600GB), but since it is on disk it can be loaded on demand.</p>
+<p>Now it takes 10s/query (against 2 minutes from the previous approach), with very low latency.</p>
+<p>There is a command line client available that will calculate a signature for your data if you don't have one.</p>
+<p>And combined with wort you can do one liner like this one, which downloads a RefSeq signature from wort and search for matches using mastiff.</p>
+
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <img src="thumbs/35.jpg"></td>
+  <td>
+      <p>To verify the results from this MAG search I picked one of the MAGs, TOBG_NP-110, an archeal MAG that failed to be classified further than the Phylum level on the original analysis The NP stands for North Pacific.</p>
+<p>I downloaded the metagenomes and used minimap2 to verify containment, and they match, which is a great validation of the estimator because you can see it matches exactly.</p>
+
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <img src="thumbs/36.jpg"></td>
+  <td>
+      <p>But even cooler is that I was preparing this presentation and a couple of matches in the South Pacific are very close to this other article published last year, which did new sequencing and found the same species in the same spot!</p>
+
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <img src="thumbs/37.jpg"></td>
+  <td>
+      <p>Another cool result is from this collaboration that investigated a Kp outbreak in Europe and found a closely related genome match in the US, which was totally unexpected.</p>
+
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <img src="thumbs/38.jpg"></td>
+  <td>
+      <p>Deviating a bit from large scale search, I would like to mention a couple of other analyses that can be done with FracMinHash, starting with taxonomic profiling of metagenomes.</p>
+<p>Gather is a method for finding min-set covers for a dataset. Using a metagenomes as query and coupling with a reference database for genomes it can identify which genomes are present in the metagenomes, and what is their abundance.</p>
+
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <img src="thumbs/39.jpg"></td>
+  <td>
+      <p>We compared it to other taxonomic profilers and it performed pretty well, using reference databases containing many more genomes than other tools.</p>
+
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <img src="thumbs/40.jpg"></td>
+  <td>
+      <p>A puppy-sibling of mastiff is greyhound, which is in-memory only but very fast. I prepared a demo using the 65k species clusters from GTDB rs207 and provided a web interface for building sourmash signatures for your data locally in the browser, and sending the signature to a server for running gather.</p>
+<p>This server uses about 7 GB of RAM for the index.</p>
+<p>(And mastiff will get a web frontend too, I just ran out of time to build it for this presentation)</p>
+
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <img src="thumbs/41.jpg"></td>
+  <td>
+      <p>The gather algorithm can also be used for detecting contamination in genomes, charcoal is the project doing this in the lab.</p>
+
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <img src="thumbs/42.jpg"></td>
+  <td>
+      <p>Genome-grist is a pipeline that automates a lot of these metagenome-related queries, like downloading the data from the SRA, and generate some plots and summary info.</p>
+
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <img src="thumbs/43.jpg"></td>
+  <td>
+      <p>There are also projects in the DIB Lab using FracMinHash sketches, like the new version of this fast clustering of hundreds of microbiome datasets.</p>
+
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <img src="thumbs/44.jpg"></td>
+  <td>
+      <p>And that was a whirlwind of information, so thanks for sticking around, and feel free to contact me or any of the other sourmash developers for more information!</p>
+
+  </td>
+</tr>
+
+
+</table>
+&copy;2022 <a href="https://luizirber.org">Luiz Irber</a>
+</div>
+
+</body>
+</html>
